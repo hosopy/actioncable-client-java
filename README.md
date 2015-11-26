@@ -1,5 +1,7 @@
 # actioncable-client-java
 
+[![Build Status](https://travis-ci.org/hosopy/actioncable-client-java.svg)](https://travis-ci.org/hosopy/actioncable-client-java)
+
 This is the actioncable client library for Java.
 Please see [rails/actioncable](https://github.com/rails/actioncable) to understand actioncable itself.
 
