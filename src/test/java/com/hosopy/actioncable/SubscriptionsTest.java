@@ -51,15 +51,8 @@ public class SubscriptionsTest {
 
         final Subscriptions subscriptions = consumer.getSubscriptions();
         final Subscription subscription = subscriptions.create(new Channel("CommentsChannel"));
-        subscription.onConnected(new Subscription.ConnectedCallback() {
-            @Override
-            public void call() {
-                events.offer("connected");
-            }
-        });
 
         // Callback test
-        assertThat(events.take(), is("connected"));
         assertThat(events.take(), is("onMessage:" + Command.subscribe(subscription.getIdentifier()).toJson()));
 
         mockWebServer.shutdown();
@@ -85,17 +78,10 @@ public class SubscriptionsTest {
 
         final Subscriptions subscriptions = consumer.getSubscriptions();
         final Subscription subscription = subscriptions.create(new Channel("CommentsChannel"));
-        subscription.onConnected(new Subscription.ConnectedCallback() {
-            @Override
-            public void call() {
-                events.offer("connected");
-            }
-        });
 
         consumer.open();
 
         // Callback test
-        assertThat(events.take(), is("connected"));
         assertThat(events.take(), is("onMessage:" + Command.subscribe(subscription.getIdentifier()).toJson()));
 
         mockWebServer.shutdown();
@@ -129,31 +115,17 @@ public class SubscriptionsTest {
         final Subscriptions subscriptions = consumer.getSubscriptions();
 
         final Subscription subscription1 = subscriptions.create(new Channel("CommentsChannel"));
-        subscription1.onConnected(new Subscription.ConnectedCallback() {
-            @Override
-            public void call() {
-                events.offer("connected_1");
-            }
-        });
-
         final Subscription subscription2 = subscriptions.create(new Channel("NotificationChannel"));
-        subscription2.onConnected(new Subscription.ConnectedCallback() {
-            @Override
-            public void call() {
-                events.offer("connected_2");
-            }
-        });
 
         consumer.open();
 
-        events.take(); // connected_1
-        events.take(); // connected_2
-        events.take(); // WebSocketListener#onMessage
-        events.take(); // WebSocketListener#onMessage
+        events.take(); // WebSocketListener#onMessage (subscribe)
+        events.take(); // WebSocketListener#onMessage (subscribe)
 
         subscriptions.remove(subscription1);
 
         assertThat(subscriptions.contains(subscription1), is(false));
+        assertThat(subscriptions.contains(subscription2), is(true));
 
         assertThat(events.take(), is("onMessage:" + Command.unsubscribe(subscription1.getIdentifier()).toJson()));
 
@@ -179,28 +151,13 @@ public class SubscriptionsTest {
         final Subscriptions subscriptions = consumer.getSubscriptions();
 
         final Subscription subscription1 = subscriptions.create(new Channel("CommentsChannel"));
-        subscription1.onConnected(new Subscription.ConnectedCallback() {
-            @Override
-            public void call() {
-                events.offer("connected_1");
-            }
-        });
-
         // Channel is same as subscription1
         final Subscription subscription2 = subscriptions.create(new Channel("CommentsChannel"));
-        subscription2.onConnected(new Subscription.ConnectedCallback() {
-            @Override
-            public void call() {
-                events.offer("connected_2");
-            }
-        });
 
         consumer.open();
 
-        events.take(); // connected_1
-        events.take(); // connected_2
-        events.take(); // WebSocketListener#onMessage
-        events.take(); // WebSocketListener#onMessage
+        events.take(); // WebSocketListener#onMessage (subscribe)
+        events.take(); // WebSocketListener#onMessage (subscribe)
 
         subscriptions.remove(subscription1);
 

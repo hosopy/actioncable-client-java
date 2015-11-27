@@ -70,9 +70,7 @@ public class Subscriptions {
 
     /*package*/ void reload() {
         for (final SubscriptionProxy subscriptionProxy : subscriptionProxies.values()) {
-            if (sendSubscribeCommand(subscriptionProxy)) {
-                subscriptionProxy.notifyConnected();
-            }
+            sendSubscribeCommand(subscriptionProxy);
         }
     }
 
