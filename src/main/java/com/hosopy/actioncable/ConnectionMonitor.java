@@ -34,8 +34,6 @@ public class ConnectionMonitor {
         this.reconnectionMaxAttempts = options.reconnectionMaxAttempts;
         this.reconnectionDelay = options.reconnectionDelay;
         this.reconnectionDelayMax = options.reconnectionDelayMax;
-
-        start();
     }
 
     /*package*/ void connected() {
@@ -52,15 +50,19 @@ public class ConnectionMonitor {
         pingedAt = now();
     }
 
-    private void reset() {
-        reconnectAttempts = 0;
-    }
-
-    private void start() {
+    /*package*/ void start() {
         reset();
         stoppedAt = 0;
         startedAt = now();
         poll();
+    }
+
+    /*package*/ void stop() {
+        stoppedAt = now();
+    }
+
+    private void reset() {
+        reconnectAttempts = 0;
     }
 
     private void poll() {

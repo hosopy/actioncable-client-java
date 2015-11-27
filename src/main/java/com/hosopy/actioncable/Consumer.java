@@ -84,6 +84,7 @@ public class Consumer {
      */
     public void open() {
         connection.open();
+        connectionMonitor.start();
     }
 
     /**
@@ -91,6 +92,7 @@ public class Consumer {
      */
     public void close() {
         connection.close();
+        connectionMonitor.stop();
     }
 
     /*package*/ boolean send(Command command) {
