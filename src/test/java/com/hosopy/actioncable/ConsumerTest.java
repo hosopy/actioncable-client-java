@@ -134,7 +134,11 @@ public class ConsumerTest {
 
         events.take(); // onOpen
 
-        consumer.send(Command.subscribe("identifier"));
+        // At this point, the server has received onOpen, but the connection has not always received onOpen.
+        // Continue sending until connection succeeds sending.
+        while (!consumer.send(Command.subscribe("identifier"))) {
+            Thread.sleep(100);
+        }
 
         assertThat(events.take(), is("onMessage:{\"command\":\"subscribe\",\"identifier\":\"identifier\"}"));
 
