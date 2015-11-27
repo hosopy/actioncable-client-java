@@ -117,9 +117,7 @@ public class Subscriptions {
 
     private void add(SubscriptionProxy subscriptionProxy) {
         subscriptionProxies.put(subscriptionProxy.getProxy(), subscriptionProxy);
-        if (sendSubscribeCommand(subscriptionProxy)) {
-            subscriptionProxy.notifyConnected();
-        }
+        sendSubscribeCommand(subscriptionProxy);
     }
 
     private void forget(Subscription subscription) {
