@@ -1,6 +1,7 @@
 # actioncable-client-java
 
 [![Build Status](https://travis-ci.org/hosopy/actioncable-client-java.svg)](https://travis-ci.org/hosopy/actioncable-client-java)
+[![Release](https://jitpack.io/v/tpmullan/actioncable-client-java.svg)](https://jitpack.io/#tpmullan/actioncable-client-java)
 
 This is the actioncable client library for Java.
 Please see [rails/actioncable](https://github.com/rails/actioncable) to understand actioncable itself.
@@ -8,6 +9,15 @@ Please see [rails/actioncable](https://github.com/rails/actioncable) to understa
 **WARNING: The actioncable is currently in alpha status. This library also supports only SNAPSHOT version.**
 
 ## Usage
+```
+  repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+   }
+   dependencies {
+         compile 'com.github.tpmullan:actioncable-client-java:0.1.0'
+   }
+```
 
 This Library uses [google/gson](https://github.com/google/gson) to parse and compose JSON strings.
 
