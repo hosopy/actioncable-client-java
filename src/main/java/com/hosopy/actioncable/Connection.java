@@ -126,6 +126,8 @@ public class Connection {
                         }
                     } catch (IOException e) {
                         fireOnFailure(e);
+                    } catch (IllegalStateException e) {
+                        fireOnFailure(e);
                     }
                 }
             }
