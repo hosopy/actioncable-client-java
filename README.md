@@ -4,7 +4,7 @@
 [![Release](https://jitpack.io/v/tpmullan/actioncable-client-java.svg)](https://jitpack.io/#tpmullan/actioncable-client-java)
 
 This is the actioncable client library for Java.
-Please see [rails/actioncable](https://github.com/rails/actioncable) to understand actioncable itself.
+Please see [Action Cable Overview](http://guides.rubyonrails.org/action_cable_overview.html) to understand actioncable itself.
 
 **WARNING: The actioncable is currently in alpha status. This library also supports only SNAPSHOT version.**
 
