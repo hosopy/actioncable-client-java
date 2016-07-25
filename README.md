@@ -9,13 +9,16 @@ Please see [Action Cable Overview](http://guides.rubyonrails.org/action_cable_ov
 **WARNING: The actioncable is currently in alpha status. This library also supports only SNAPSHOT version.**
 
 ## Usage
-```
+
+Gradle
+
+```groovy
   repositories {
         jcenter()
         maven { url "https://jitpack.io" }
    }
    dependencies {
-         compile 'com.github.tpmullan:actioncable-client-java:0.1.0'
+         compile 'com.github.hosopy:actioncable-client-java:0.1.0'
    }
 ```
 
