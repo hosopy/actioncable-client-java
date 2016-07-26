@@ -137,7 +137,7 @@ URI uri = new URI("ws://cable.example.com");
 Consumer.Options options = new Consumer.Options();
 options.reconnection = true;
 
-Consumer consumer = Cable.createConsumer(uri, options);
+Consumer consumer = ActionCable.createConsumer(uri, options);
 ```
 
 Below is a list of available options.
@@ -205,7 +205,7 @@ Map<String, String> headers = new HashMap();
 headers.put("Authorization", "Bearer xxxxxxxxxxx");
 options.headers = headers;
 
-Consumer consumer = Cable.createConsumer(uri, options);
+Consumer consumer = ActionCable.createConsumer(uri, options);
 ```
 
 #### Authenticate by Query Params
@@ -217,7 +217,7 @@ Map<String, String> query = new HashMap();
 query.put("access_token", "xxxxxxxxxx");
 options.query = query;
 
-Consumer consumer = Cable.createConsumer(uri, options);
+Consumer consumer = ActionCable.createConsumer(uri, options);
 ```
 
 #### Authenticate by Cookie
@@ -228,7 +228,7 @@ CookieManager cookieManager = new CookieManager();
 ...
 options.cookieHandler = cookieManager;
 
-Consumer consumer = Cable.createConsumer(uri, options);
+Consumer consumer = ActionCable.createConsumer(uri, options);
 ```
 
 ## License
