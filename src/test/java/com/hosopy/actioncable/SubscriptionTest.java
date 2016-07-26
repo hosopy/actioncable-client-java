@@ -283,7 +283,7 @@ public class SubscriptionTest {
 
         final Consumer consumer = new Consumer(mockWebServer.url("/").uri());
         final Subscription subscription = consumer.getSubscriptions().create(new Channel("CommentsChannel"));
-        consumer.open();
+        consumer.connect();
 
         events.take(); // { command: subscribe }
 
@@ -318,7 +318,7 @@ public class SubscriptionTest {
 
         final Consumer consumer = new Consumer(mockWebServer.url("/").uri());
         final Subscription subscription = consumer.getSubscriptions().create(new Channel("CommentsChannel"), CustomSubscription.class);
-        consumer.open();
+        consumer.connect();
 
         events.take(); // { command: subscribe }
 
@@ -353,7 +353,7 @@ public class SubscriptionTest {
 
         final Consumer consumer = new Consumer(mockWebServer.url("/").uri());
         final Subscription subscription = consumer.getSubscriptions().create(new Channel("CommentsChannel"));
-        consumer.open();
+        consumer.connect();
 
         events.take(); // { command: subscribe }
 
@@ -386,7 +386,7 @@ public class SubscriptionTest {
 
         final Consumer consumer = new Consumer(mockWebServer.url("/").uri());
         final Subscription subscription = consumer.getSubscriptions().create(new Channel("CommentsChannel"), CustomSubscription.class);
-        consumer.open();
+        consumer.connect();
 
         events.take(); // { command: subscribe }
 
@@ -419,7 +419,7 @@ public class SubscriptionTest {
 
         final Consumer consumer = new Consumer(mockWebServer.url("/").uri());
         final CustomSubscription subscription = consumer.getSubscriptions().create(new Channel("CommentsChannel"), CustomSubscription.class);
-        consumer.open();
+        consumer.connect();
 
         events.take(); // { command: subscribe }
 

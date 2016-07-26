@@ -12,7 +12,7 @@ import java.net.URI;
  * Subscription subscription = consumer.getSubscriptions().create(appearanceChannel);
  * // Custom Subscription Interface
  * ChatSubscription chatSubscription = consumer.getSubscriptions().create(appearanceChannel, ChatSubscription.class);
- * consumer.open();
+ * consumer.connect();
  * }</pre>
  *
  * @author hosopy
@@ -82,7 +82,7 @@ public class Consumer {
     /**
      * Establish connection.
      */
-    public void open() {
+    public void connect() {
         connection.open();
         connectionMonitor.start();
     }

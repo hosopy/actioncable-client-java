@@ -47,7 +47,7 @@ public class SubscriptionsTest {
         mockWebServer.start();
 
         final Consumer consumer = new Consumer(mockWebServer.url("/").uri());
-        consumer.open();
+        consumer.connect();
 
         final Subscriptions subscriptions = consumer.getSubscriptions();
         final Subscription subscription = subscriptions.create(new Channel("CommentsChannel"));
@@ -79,7 +79,7 @@ public class SubscriptionsTest {
         final Subscriptions subscriptions = consumer.getSubscriptions();
         final Subscription subscription = subscriptions.create(new Channel("CommentsChannel"));
 
-        consumer.open();
+        consumer.connect();
 
         // Callback test
         assertThat(events.take(), is("onMessage:" + Command.subscribe(subscription.getIdentifier()).toJson()));
@@ -117,7 +117,7 @@ public class SubscriptionsTest {
         final Subscription subscription1 = subscriptions.create(new Channel("CommentsChannel"));
         final Subscription subscription2 = subscriptions.create(new Channel("NotificationChannel"));
 
-        consumer.open();
+        consumer.connect();
 
         events.take(); // WebSocketListener#onMessage (subscribe)
         events.take(); // WebSocketListener#onMessage (subscribe)
@@ -154,7 +154,7 @@ public class SubscriptionsTest {
         // Channel is same as subscription1
         final Subscription subscription2 = subscriptions.create(new Channel("CommentsChannel"));
 
-        consumer.open();
+        consumer.connect();
 
         events.take(); // WebSocketListener#onMessage (subscribe)
         events.take(); // WebSocketListener#onMessage (subscribe)
@@ -192,7 +192,7 @@ public class SubscriptionsTest {
             }
         });
 
-        consumer.open();
+        consumer.connect();
 
         final JsonObject data = new JsonObject();
         data.addProperty("foo", "bar");

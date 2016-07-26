@@ -52,7 +52,7 @@ public class ConsumerTest {
     }
 
     @Test(timeout = TIMEOUT)
-    public void open() throws IOException, InterruptedException {
+    public void connect() throws IOException, InterruptedException {
         final BlockingQueue<String> events = new LinkedBlockingQueue<String>();
 
         final MockWebServer mockWebServer = new MockWebServer();
@@ -68,7 +68,7 @@ public class ConsumerTest {
         mockWebServer.start();
 
         final Consumer consumer = new Consumer(mockWebServer.url("/").uri());
-        consumer.open();
+        consumer.connect();
 
         assertThat(events.take(), is("onOpen"));
 
@@ -97,7 +97,7 @@ public class ConsumerTest {
         mockWebServer.start();
 
         final Consumer consumer = new Consumer(mockWebServer.url("/").uri());
-        consumer.open();
+        consumer.connect();
 
         events.take(); // onOpen
 
@@ -130,7 +130,7 @@ public class ConsumerTest {
         mockWebServer.start();
 
         final Consumer consumer = new Consumer(mockWebServer.url("/").uri());
-        consumer.open();
+        consumer.connect();
 
         events.take(); // onOpen
 

@@ -65,8 +65,8 @@ subscription
         }
     });
 
-// 3. Open connection
-consumer.open();
+// 3. Establish connection
+consumer.connect();
 
 // 4. Perform any action
 subscription.perform("away");
