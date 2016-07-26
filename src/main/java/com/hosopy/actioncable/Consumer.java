@@ -88,9 +88,9 @@ public class Consumer {
     }
 
     /**
-     * Close the underlying connection.
+     * Disconnect the underlying connection.
      */
-    public void close() {
+    public void disconnect() {
         connection.close();
         connectionMonitor.stop();
     }

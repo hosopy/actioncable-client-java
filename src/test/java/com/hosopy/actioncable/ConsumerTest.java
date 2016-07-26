@@ -76,7 +76,7 @@ public class ConsumerTest {
     }
 
     @Test(timeout = TIMEOUT)
-    public void close() throws IOException, InterruptedException {
+    public void disconnect() throws IOException, InterruptedException {
         final BlockingQueue<String> events = new LinkedBlockingQueue<String>();
 
         final MockWebServer mockWebServer = new MockWebServer();
@@ -101,7 +101,7 @@ public class ConsumerTest {
 
         events.take(); // onOpen
 
-        consumer.close();
+        consumer.disconnect();
 
         assertThat(events.take(), is("onClose"));
 
