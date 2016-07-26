@@ -35,7 +35,7 @@ public class Consumer {
         this.connection.setListener(new Connection.Listener() {
             @Override
             public void onOpen() {
-                connectionMonitor.connected();
+                connectionMonitor.recordConnect();
                 subscriptions.reload();
             }
 
@@ -48,7 +48,7 @@ public class Consumer {
             public void onMessage(String string) {
                 final Message message = Message.fromJson(string);
                 if (message.isPing()) {
-                    connectionMonitor.pingReceived();
+                    connectionMonitor.recordPing();
                 } else if (message.isConfirmation()) {
                     subscriptions.notifyConnected(message.getIdentifier());
                 } else if (message.isRejection()) {
@@ -61,7 +61,7 @@ public class Consumer {
             @Override
             public void onClose() {
                 subscriptions.notifyDisconnected();
-                connectionMonitor.disconnected();
+                connectionMonitor.recordDisconnect();
             }
         });
     }

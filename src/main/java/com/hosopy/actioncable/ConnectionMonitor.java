@@ -36,17 +36,17 @@ public class ConnectionMonitor {
         this.reconnectionDelayMax = options.reconnectionDelayMax;
     }
 
-    /*package*/ void connected() {
+    /*package*/ void recordConnect() {
         reset();
         pingedAt = now();
         disconnectedAt = 0;
     }
 
-    /*package*/ void disconnected() {
+    /*package*/ void recordDisconnect() {
         disconnectedAt = now();
     }
 
-    /*package*/ void pingReceived() {
+    /*package*/ void recordPing() {
         pingedAt = now();
     }
 
