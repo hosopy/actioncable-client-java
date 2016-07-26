@@ -11,17 +11,17 @@ import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
 @RunWith(JUnit4.class)
-public class CableTest {
+public class ActionCableTest {
 
     @Test
     public void createWithUri() throws URISyntaxException {
-        final Consumer consumer = Cable.createConsumer(new URI("ws://example.com:28080"));
+        final Consumer consumer = ActionCable.createConsumer(new URI("ws://example.com:28080"));
         assertThat(consumer, notNullValue());
     }
 
     @Test
     public void createWithUriAndOptions() throws URISyntaxException {
-        final Consumer consumer = Cable.createConsumer(new URI("ws://example.com:28080"), new Consumer.Options());
+        final Consumer consumer = ActionCable.createConsumer(new URI("ws://example.com:28080"), new Consumer.Options());
         assertThat(consumer, notNullValue());
     }
 }

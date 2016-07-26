@@ -3,15 +3,15 @@ package com.hosopy.actioncable;
 import java.net.URI;
 
 /**
- * Cable is an entry point to create consumers.
+ * ActionCable is an entry point to create consumers.
  *
  * <pre>{@code
- * Consumer consumer = Cable.createConsumer(new URI("ws://cable.example.com"));
+ * Consumer consumer = ActionCable.createConsumer(new URI("ws://cable.example.com"));
  * }</pre>
  *
  * @author hosopy
  */
-public class Cable {
+public class ActionCable {
     /**
      * Create a consumer with uri and options.
      *

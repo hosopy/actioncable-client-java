@@ -31,7 +31,7 @@ Please see [user guide](https://sites.google.com/site/gson/gson-user-guide) to k
 ```java
 // 1. Setup
 URI uri = new URI("ws://cable.example.com");
-Consumer consumer = Cable.createConsumer(uri);
+Consumer consumer = ActionCable.createConsumer(uri);
 
 // 2. Create subscription
 Channel appearanceChannel = new Channel("AppearanceChannel");
