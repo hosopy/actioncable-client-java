@@ -6,8 +6,6 @@
 This is the actioncable client library for Java.
 Please see [Action Cable Overview](http://guides.rubyonrails.org/action_cable_overview.html) to understand actioncable itself.
 
-**WARNING: The actioncable is currently in alpha status. This library also supports only SNAPSHOT version.**
-
 ## Usage
 
 Gradle
