@@ -11,13 +11,14 @@ Please see [Action Cable Overview](http://guides.rubyonrails.org/action_cable_ov
 Gradle
 
 ```groovy
-  repositories {
-        jcenter()
-        maven { url "https://jitpack.io" }
-   }
-   dependencies {
-         compile 'com.github.hosopy:actioncable-client-java:0.1.0'
-   }
+repositories {
+    jcenter()
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+    compile 'com.github.hosopy:actioncable-client-java:0.1.0'
+}
 ```
 
 This Library uses [google/gson](https://github.com/google/gson) to parse and compose JSON strings.
@@ -142,54 +143,54 @@ Consumer consumer = Cable.createConsumer(uri, options);
 Below is a list of available options.
 
 * sslContext
-   
-   ```java
-   options.sslContext = yourSSLContextInstance;
-   ```
-   
+    
+    ```java
+    options.sslContext = yourSSLContextInstance;
+    ```
+    
 * hostnameVerifier
-   
-   ```java
-   options.hostnameVerifier = yourHostnameVerifier;
-   ```
-   
+    
+    ```java
+    options.hostnameVerifier = yourHostnameVerifier;
+    ```
+    
 * cookieHandler
-   
-   ```java
-   options.cookieHandler = yourCookieManagerInstance;
-   ```
-   
+    
+    ```java
+    options.cookieHandler = yourCookieManagerInstance;
+    ```
+    
 * query
-   
-   ```java
-   Map<String, String> query = new HashMap();
-   query.put("foo", "bar");
-   options.query = query;
-   ```
-   
+    
+    ```java
+    Map<String, String> query = new HashMap();
+    query.put("foo", "bar");
+    options.query = query;
+    ```
+    
 * headers
-   
-   ```java
-   Map<String, String> headers = new HashMap();
-   headers.put("X-FOO", "bar");
-   options.headers = headers;
-   ```
-   
+    
+    ```java
+    Map<String, String> headers = new HashMap();
+    headers.put("X-FOO", "bar");
+    options.headers = headers;
+    ```
+    
 * reconnection
-   * If reconnection is true, the client attempts to reconnect to the server when underlying connection is stale.
-   * Default is `false`.
-   
-   ```java
-   options.reconnection = false;
-   ```
-   
+    * If reconnection is true, the client attempts to reconnect to the server when underlying connection is stale.
+    * Default is `false`.
+    
+    ```java
+    options.reconnection = false;
+    ```
+    
 * reconnectionMaxAttempts
-   * The maximum number of attempts to reconnect.
-   * Default is `30`.
-   
-   ```java
-   options.reconnectionMaxAttempts = 30;
-   ```
+    * The maximum number of attempts to reconnect.
+    * Default is `30`.
+    
+    ```java
+    options.reconnectionMaxAttempts = 30;
+    ```
 
 ### Authentication
 
