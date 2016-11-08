@@ -33,7 +33,7 @@ class Message {
     }
 
     /*package*/ boolean isPing() {
-        return "_ping".equals(getIdentifier());
+        return "ping".equals(getType());
     }
 
     /*package*/ boolean isConfirmation() {
