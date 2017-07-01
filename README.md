@@ -192,6 +192,21 @@ Below is a list of available options.
     options.reconnectionMaxAttempts = 30;
     ```
 
+* okHttpClientFactory
+    * Factory instance to create your own OkHttpClient.
+    * If `okHttpClientFactory` is not set, just create OkHttpClient by `new OkHttpClient()`.
+    
+    ```java
+    options.okHttpClientFactory = new Connection.Options.OkHttpClientFactory() {
+        @Override
+        public OkHttpClient createOkHttpClient() {
+            final OkHttpClient client = new OkHttpClient();
+            client.networkInterceptors().add(new StethoInterceptor());
+            return client;
+        }
+    };
+    ```
+
 ### Authentication
 
 How to authenticate a request depends on the architecture you choose.

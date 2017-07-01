@@ -76,6 +76,16 @@ public class Connection {
         public int reconnectionMaxAttempts = 30;
         public int reconnectionDelay = 3;
         public int reconnectionDelayMax = 30;
+        /**
+         * OkHttpClientFactory
+         * <p/>
+         * <p>To use your own OkHttpClient, set this option.</p>
+         */
+        public OkHttpClientFactory okHttpClientFactory;
+
+        public interface OkHttpClientFactory {
+            OkHttpClient createOkHttpClient();
+        }
     }
 
     private State state = State.CONNECTING;
@@ -164,7 +174,12 @@ public class Connection {
     private void doOpen() {
         state = State.CONNECTING;
 
-        final OkHttpClient client = new OkHttpClient();
+        OkHttpClient client;
+        if (options.okHttpClientFactory != null) {
+            client = options.okHttpClientFactory.createOkHttpClient();
+        } else {
+            client = new OkHttpClient();
+        }
 
         if (options.sslContext != null) {
             final SSLSocketFactory factory = options.sslContext.getSocketFactory();
