@@ -2,12 +2,17 @@ package com.hosopy.actioncable;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ConnectionMonitor {
 
     private static final int STALE_THRESHOLD = 6; // Server::Connections::BEAT_INTERVAL * 2 (missed two pings)
 
     private final Connection connection;
+
+    private final ScheduledExecutorService pollExecutorService;
 
     private final boolean reconnection;
 
@@ -29,6 +34,7 @@ public class ConnectionMonitor {
 
     /*package*/ ConnectionMonitor(Connection connection, Connection.Options options) {
         this.connection = connection;
+        this.pollExecutorService = Executors.newSingleThreadScheduledExecutor();
 
         this.reconnection = options.reconnection;
         this.reconnectionMaxAttempts = options.reconnectionMaxAttempts;
@@ -66,16 +72,14 @@ public class ConnectionMonitor {
     }
 
     private void poll() {
-        final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
+        pollExecutorService.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 if (stoppedAt == 0) {
                     reconnectIfStale();
-                    poll();
                 }
             }
-        }, getInterval());
+        }, getInterval(), getInterval(), TimeUnit.MILLISECONDS);
     }
 
     private void reconnectIfStale() {
