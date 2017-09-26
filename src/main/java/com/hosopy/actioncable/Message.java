@@ -32,6 +32,10 @@ class Message {
         return message;
     }
 
+    /*package*/ boolean isWelcome() {
+        return "welcome".equals(getType());
+    }
+
     /*package*/ boolean isPing() {
         return "ping".equals(getType());
     }
