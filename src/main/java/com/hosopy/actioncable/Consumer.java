@@ -48,8 +48,7 @@ public class Consumer {
             public void onMessage(String string) {
                 final Message message = Message.fromJson(string);
                 if (message.isWelcome()) {
-                    connectionMonitor.recordConnect();
-                    subscriptions.reload();
+                    onOpen();
                 } else if (message.isPing()) {
                     connectionMonitor.recordPing();
                 } else if (message.isConfirmation()) {
