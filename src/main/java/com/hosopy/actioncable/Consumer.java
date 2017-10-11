@@ -47,7 +47,9 @@ public class Consumer {
             @Override
             public void onMessage(String string) {
                 final Message message = Message.fromJson(string);
-                if (message.isPing()) {
+                if (message.isWelcome()) {
+                    onOpen();
+                } else if (message.isPing()) {
                     connectionMonitor.recordPing();
                 } else if (message.isConfirmation()) {
                     subscriptions.notifyConnected(message.getIdentifier());
