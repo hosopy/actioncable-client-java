@@ -4,13 +4,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.hosopy.actioncable.annotation.Data;
 import com.hosopy.actioncable.annotation.Perform;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-import com.squareup.okhttp.ws.WebSocket;
-import com.squareup.okhttp.ws.WebSocketListener;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.ws.WebSocket;
+import okhttp3.ws.WebSocketListener;
 import okio.Buffer;
 import okio.BufferedSource;
+import okio.ByteString;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -271,11 +273,11 @@ public class SubscriptionTest {
 
         final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
-        response.withWebSocketUpgrade(new DefaultWebSocketListener() {
+        response.withWebSocketUpgrade(new DefaultWebSocketListener(){
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer(payload.readUtf8());
-                payload.close();
+            public void onMessage(ResponseBody message) throws IOException {
+                events.offer(message.string());
+                message.close();
             }
         });
         mockWebServer.enqueue(response);
@@ -306,11 +308,11 @@ public class SubscriptionTest {
 
         final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
-        response.withWebSocketUpgrade(new DefaultWebSocketListener() {
+        response.withWebSocketUpgrade(new DefaultWebSocketListener(){
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer(payload.readUtf8());
-                payload.close();
+            public void onMessage(ResponseBody message) throws IOException {
+                events.offer(message.string());
+                message.close();
             }
         });
         mockWebServer.enqueue(response);
@@ -341,11 +343,11 @@ public class SubscriptionTest {
 
         final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
-        response.withWebSocketUpgrade(new DefaultWebSocketListener() {
+        response.withWebSocketUpgrade(new DefaultWebSocketListener(){
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer(payload.readUtf8());
-                payload.close();
+            public void onMessage(ResponseBody message) throws IOException {
+                events.offer(message.string());
+                message.close();
             }
         });
         mockWebServer.enqueue(response);
@@ -374,11 +376,11 @@ public class SubscriptionTest {
 
         final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
-        response.withWebSocketUpgrade(new DefaultWebSocketListener() {
+        response.withWebSocketUpgrade(new DefaultWebSocketListener(){
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer(payload.readUtf8());
-                payload.close();
+            public void onMessage(ResponseBody message) throws IOException {
+                events.offer(message.string());
+                message.close();
             }
         });
         mockWebServer.enqueue(response);
@@ -409,9 +411,9 @@ public class SubscriptionTest {
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer(payload.readUtf8());
-                payload.close();
+            public void onMessage(ResponseBody message) throws IOException{
+                events.offer(message.string());
+                message.close();
             }
         });
         mockWebServer.enqueue(response);
@@ -515,26 +517,29 @@ public class SubscriptionTest {
     }
 
     private static class DefaultWebSocketListener implements WebSocketListener {
-
         @Override
         public void onOpen(WebSocket webSocket, Response response) {
+
         }
 
         @Override
         public void onFailure(IOException e, Response response) {
+
         }
 
         @Override
-        public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-            payload.close();
+        public void onMessage(ResponseBody message) throws IOException {
+
         }
 
         @Override
         public void onPong(Buffer payload) {
+
         }
 
         @Override
         public void onClose(int code, String reason) {
+
         }
     }
 }

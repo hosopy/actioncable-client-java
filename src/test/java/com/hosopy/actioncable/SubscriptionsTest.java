@@ -2,11 +2,12 @@ package com.hosopy.actioncable;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-import com.squareup.okhttp.ws.WebSocket;
-import com.squareup.okhttp.ws.WebSocketListener;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.ws.WebSocket;
+import okhttp3.ws.WebSocketListener;
 import okio.Buffer;
 import okio.BufferedSource;
 import org.junit.Test;
@@ -20,9 +21,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 @RunWith(JUnit4.class)
@@ -37,10 +36,11 @@ public class SubscriptionsTest {
         final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
+
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer("onMessage:" + payload.readUtf8());
-                payload.close();
+            public void onMessage(ResponseBody message) throws IOException {
+                events.offer("onMessage:" + message.string());
+                message.close();
             }
         });
         mockWebServer.enqueue(response);
@@ -66,9 +66,9 @@ public class SubscriptionsTest {
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer("onMessage:" + payload.readUtf8());
-                payload.close();
+            public void onMessage(ResponseBody message) throws IOException {
+                events.offer("onMessage:" + message.string());
+                message.close();
             }
         });
         mockWebServer.enqueue(response);
@@ -104,9 +104,9 @@ public class SubscriptionsTest {
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer("onMessage:" + payload.readUtf8());
-                payload.close();
+            public void onMessage(ResponseBody message) throws IOException {
+                events.offer("onMessage:" + message.string());
+                message.close();
             }
         });
         mockWebServer.enqueue(response);
@@ -140,10 +140,11 @@ public class SubscriptionsTest {
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer("onMessage:" + payload.readUtf8());
-                payload.close();
+            public void onMessage(ResponseBody message) throws IOException {
+                events.offer("onMessage:" + message.string());
+                message.close();
             }
+
         });
         mockWebServer.enqueue(response);
 
@@ -341,8 +342,8 @@ public class SubscriptionsTest {
         }
 
         @Override
-        public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-            payload.close();
+        public void onMessage(ResponseBody message) throws IOException {
+            message.close();
         }
 
         @Override

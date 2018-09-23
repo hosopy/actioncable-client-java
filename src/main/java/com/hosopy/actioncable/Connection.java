@@ -2,20 +2,17 @@ package com.hosopy.actioncable;
 
 import com.hosopy.concurrent.EventLoop;
 import com.hosopy.util.QueryStringUtils;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ws.WebSocket;
-import com.squareup.okhttp.ws.WebSocketCall;
-import com.squareup.okhttp.ws.WebSocketListener;
+import okhttp3.*;
+import okhttp3.ws.WebSocket;
+import okhttp3.ws.WebSocketCall;
+import okhttp3.ws.WebSocketListener;
 import okio.Buffer;
-import okio.BufferedSource;
+import okio.ByteString;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
-import java.net.CookieHandler;
 import java.net.URI;
 import java.util.Map;
 
@@ -53,7 +50,7 @@ public class Connection {
         /**
          * CookieHandler
          */
-        public CookieHandler cookieHandler;
+        public CookieJar cookieHandler;
         /**
          * Query parameters
          */
@@ -178,20 +175,25 @@ public class Connection {
         if (options.okHttpClientFactory != null) {
             client = options.okHttpClientFactory.createOkHttpClient();
         } else {
-            client = new OkHttpClient();
-        }
 
-        if (options.sslContext != null) {
-            final SSLSocketFactory factory = options.sslContext.getSocketFactory();
-            client.setSslSocketFactory(factory);
-        }
+            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
 
-        if (options.hostnameVerifier != null) {
-            client.setHostnameVerifier(options.hostnameVerifier);
-        }
 
-        if (options.cookieHandler != null) {
-            client.setCookieHandler(options.cookieHandler);
+            if (options.sslContext != null) {
+                final SSLSocketFactory factory = options.sslContext.getSocketFactory();
+                clientBuilder.sslSocketFactory(factory);
+            }
+
+            if (options.hostnameVerifier != null) {
+                clientBuilder.hostnameVerifier(options.hostnameVerifier);
+            }
+
+            if (options.cookieHandler != null) {
+                clientBuilder.cookieJar(options.cookieHandler);
+            }
+
+
+            client = clientBuilder.build();
         }
 
         String url = uri.toString();
@@ -206,19 +208,20 @@ public class Connection {
                 builder.addHeader(entry.getKey(), entry.getValue());
             }
         }
-
         final Request request = builder.build();
+
 
         final WebSocketCall webSocketCall = WebSocketCall.create(client, request);
         webSocketCall.enqueue(webSocketListener);
 
-        client.getDispatcher().getExecutorService().shutdown();
+        client.dispatcher().executorService().shutdown();
     }
 
     private void doSend(String data) {
         if (webSocket != null) {
             try {
-                webSocket.sendMessage(WebSocket.PayloadType.TEXT, new Buffer().writeUtf8(data));
+                RequestBody body = RequestBody.create(WebSocket.TEXT, ByteString.encodeUtf8(data));
+                webSocket.sendMessage(body);
             } catch (IOException e) {
                 if (listener != null) {
                     listener.onFailure(e);
@@ -272,21 +275,19 @@ public class Connection {
         }
 
         @Override
-        public void onMessage(final BufferedSource payload, final WebSocket.PayloadType type) throws IOException {
-            switch (type) {
-                case TEXT:
-                    final String text = payload.readUtf8();
-                    EventLoop.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (text != null && listener != null) {
-                                listener.onMessage(text);
-                            }
+        public void onMessage(ResponseBody message) throws IOException {
+            if (message.contentType().equals(WebSocket.TEXT)) {
+                final String text = message.string();
+                EventLoop.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (text != null && listener != null) {
+                            listener.onMessage(text);
                         }
-                    });
-                    break;
+                    }
+                });
             }
-            payload.close();
+            message.close();
         }
 
         @Override
