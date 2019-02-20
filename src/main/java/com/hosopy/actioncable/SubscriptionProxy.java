@@ -66,8 +66,6 @@ public class SubscriptionProxy<T extends Subscription> {
     }
 
     /*package*/ void perform(String action, JsonObject data) {
-        // TODO data cannot include action key...
-        data.addProperty("action", action);
         consumer.send(Command.message(channel.toIdentifier(), data));
     }
 
