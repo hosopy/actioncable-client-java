@@ -173,6 +173,7 @@ Below is a list of available options.
     ```java
     Map<String, String> headers = new HashMap();
     headers.put("X-FOO", "bar");
+    headers.put("Origin", "https://your-origin.tld");
     options.headers = headers;
     ```
     
