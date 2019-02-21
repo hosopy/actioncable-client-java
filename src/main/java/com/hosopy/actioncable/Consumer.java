@@ -61,9 +61,13 @@ public class Consumer {
             }
 
             @Override
-            public void onClose() {
+            public void onClosing() {
                 subscriptions.notifyDisconnected();
                 connectionMonitor.recordDisconnect();
+            }
+
+            @Override
+            public void onClosed() {
             }
         });
     }

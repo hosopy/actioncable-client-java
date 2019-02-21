@@ -1,12 +1,5 @@
 package com.hosopy.actioncable;
 
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-import com.squareup.okhttp.ws.WebSocket;
-import com.squareup.okhttp.ws.WebSocketListener;
-import okio.Buffer;
-import okio.BufferedSource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -17,8 +10,20 @@ import java.net.URISyntaxException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okio.Buffer;
+import okio.BufferedSource;
+import okio.ByteString;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.isA;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 @RunWith(JUnit4.class)
 public class ConsumerTest {
@@ -88,13 +93,16 @@ public class ConsumerTest {
             }
 
             @Override
-            public void onClose(int code, String reason) {
-                events.offer("onClose");
+            public void onClosing(WebSocket webSocket, int code, String reason) {
+                webSocket.close(code, reason);
+                events.offer("onClosing");
             }
         });
         mockWebServer.enqueue(response);
 
         mockWebServer.start();
+
+        Thread.sleep(1000);
 
         final Consumer consumer = new Consumer(mockWebServer.url("/").uri());
         consumer.connect();
@@ -103,7 +111,7 @@ public class ConsumerTest {
 
         consumer.disconnect();
 
-        assertThat(events.take(), is("onClose"));
+        assertThat(events.take(), is("onClosing"));
 
         mockWebServer.shutdown();
     }
@@ -121,9 +129,8 @@ public class ConsumerTest {
             }
 
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer("onMessage:" + payload.readUtf8());
-                payload.close();
+            public void onMessage(WebSocket webSocket, String text) {
+                events.offer("onMessage:" + text);
             }
         });
         mockWebServer.enqueue(response);
@@ -145,27 +152,6 @@ public class ConsumerTest {
         mockWebServer.shutdown();
     }
 
-    private static class DefaultWebSocketListener implements WebSocketListener {
-
-        @Override
-        public void onOpen(WebSocket webSocket, Response response) {
-        }
-
-        @Override
-        public void onFailure(IOException e, Response response) {
-        }
-
-        @Override
-        public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-            payload.close();
-        }
-
-        @Override
-        public void onPong(Buffer payload) {
-        }
-
-        @Override
-        public void onClose(int code, String reason) {
-        }
+    private static class DefaultWebSocketListener extends WebSocketListener {
     }
 }

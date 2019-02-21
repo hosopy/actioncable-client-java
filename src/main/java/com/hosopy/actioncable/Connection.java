@@ -2,22 +2,25 @@ package com.hosopy.actioncable;
 
 import com.hosopy.concurrent.EventLoop;
 import com.hosopy.util.QueryStringUtils;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ws.WebSocket;
-import com.squareup.okhttp.ws.WebSocketCall;
-import com.squareup.okhttp.ws.WebSocketListener;
-import okio.Buffer;
-import okio.BufferedSource;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.URI;
 import java.util.Map;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+
+import okhttp3.CookieJar;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okio.Buffer;
+import okio.ByteString;
+
 
 public class Connection {
 
@@ -35,7 +38,9 @@ public class Connection {
 
         void onMessage(String string);
 
-        void onClose();
+        void onClosing();
+
+        void onClosed();
     }
 
     /**
@@ -53,7 +58,7 @@ public class Connection {
         /**
          * CookieHandler
          */
-        public CookieHandler cookieHandler;
+        public CookieJar cookieHandler;
         /**
          * Query parameters
          */
@@ -134,8 +139,6 @@ public class Connection {
                             webSocket.close(1000, "connection closed manually");
                             state = State.CLOSING;
                         }
-                    } catch (IOException e) {
-                        fireOnFailure(e);
                     } catch (IllegalStateException e) {
                         fireOnFailure(e);
                     }
@@ -178,20 +181,23 @@ public class Connection {
         if (options.okHttpClientFactory != null) {
             client = options.okHttpClientFactory.createOkHttpClient();
         } else {
-            client = new OkHttpClient();
-        }
+            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
 
-        if (options.sslContext != null) {
-            final SSLSocketFactory factory = options.sslContext.getSocketFactory();
-            client.setSslSocketFactory(factory);
-        }
+            if (options.sslContext != null) {
+                final SSLSocketFactory factory = options.sslContext.getSocketFactory();
+                clientBuilder.sslSocketFactory(factory);
+            }
 
-        if (options.hostnameVerifier != null) {
-            client.setHostnameVerifier(options.hostnameVerifier);
-        }
+            if (options.hostnameVerifier != null) {
+                clientBuilder.hostnameVerifier(options.hostnameVerifier);
+            }
 
-        if (options.cookieHandler != null) {
-            client.setCookieHandler(options.cookieHandler);
+            if (options.cookieHandler != null) {
+                clientBuilder.cookieJar(options.cookieHandler);
+            }
+
+
+            client = clientBuilder.build();
         }
 
         String url = uri.toString();
@@ -206,24 +212,16 @@ public class Connection {
                 builder.addHeader(entry.getKey(), entry.getValue());
             }
         }
-
         final Request request = builder.build();
 
-        final WebSocketCall webSocketCall = WebSocketCall.create(client, request);
-        webSocketCall.enqueue(webSocketListener);
 
-        client.getDispatcher().getExecutorService().shutdown();
+        client.newWebSocket(request, webSocketListener);
+        client.dispatcher().executorService().shutdown();
     }
 
     private void doSend(String data) {
         if (webSocket != null) {
-            try {
-                webSocket.sendMessage(WebSocket.PayloadType.TEXT, new Buffer().writeUtf8(data));
-            } catch (IOException e) {
-                if (listener != null) {
-                    listener.onFailure(e);
-                }
-            }
+            webSocket.send(data);
         }
     }
 
@@ -258,51 +256,64 @@ public class Connection {
         }
 
         @Override
-        public void onFailure(final IOException e, Response response) {
+        public void onFailure(WebSocket webSocket, Throwable t, Response response) {
             EventLoop.execute(new Runnable() {
                 @Override
                 public void run() {
                     state = State.CLOSED;
 
                     if (listener != null) {
-                        listener.onFailure(e);
+                        listener.onFailure((Exception) t);
                     }
                 }
             });
         }
 
         @Override
-        public void onMessage(final BufferedSource payload, final WebSocket.PayloadType type) throws IOException {
-            switch (type) {
-                case TEXT:
-                    final String text = payload.readUtf8();
-                    EventLoop.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (text != null && listener != null) {
-                                listener.onMessage(text);
-                            }
-                        }
-                    });
-                    break;
-            }
-            payload.close();
+        public void onMessage(WebSocket webSocket, String text) {
+            EventLoop.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (text != null && listener != null) {
+                        listener.onMessage(text);
+                    }
+                }
+            });
         }
 
         @Override
-        public void onPong(Buffer payload) {
+        public void onClosing(WebSocket webSocket, int code, String reason) {
+            Connection.this.state = State.CLOSING;
+
+            EventLoop.execute(new Runnable() {
+                @Override
+                public void run() {
+                    state = State.CLOSING;
+
+                    if (listener != null) {
+                        listener.onClosing();
+                    }
+
+                    if (isReopening) {
+                        isReopening = false;
+                        open();
+                    }
+                }
+            });
         }
 
+
         @Override
-        public void onClose(int code, final String reason) {
+        public void onClosed(WebSocket webSocket, int code, String reason) {
             Connection.this.state = State.CLOSED;
+
             EventLoop.execute(new Runnable() {
                 @Override
                 public void run() {
                     state = State.CLOSED;
 
                     if (listener != null) {
-                        listener.onClose();
+                        listener.onClosed();
                     }
 
                     if (isReopening) {
