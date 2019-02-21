@@ -2,13 +2,7 @@ package com.hosopy.actioncable;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-import com.squareup.okhttp.ws.WebSocket;
-import com.squareup.okhttp.ws.WebSocketListener;
-import okio.Buffer;
-import okio.BufferedSource;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -20,9 +14,14 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okio.ByteString;
+
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 @RunWith(JUnit4.class)
@@ -38,9 +37,8 @@ public class SubscriptionsTest {
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer("onMessage:" + payload.readUtf8());
-                payload.close();
+            public void onMessage(WebSocket webSocket, String text) {
+                events.offer("onMessage:" + text);
             }
         });
         mockWebServer.enqueue(response);
@@ -66,9 +64,8 @@ public class SubscriptionsTest {
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer("onMessage:" + payload.readUtf8());
-                payload.close();
+            public void onMessage(WebSocket webSocket, String text) {
+                events.offer("onMessage:" + text);
             }
         });
         mockWebServer.enqueue(response);
@@ -104,9 +101,8 @@ public class SubscriptionsTest {
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer("onMessage:" + payload.readUtf8());
-                payload.close();
+            public void onMessage(WebSocket webSocket, String text) {
+                events.offer("onMessage:" + text);
             }
         });
         mockWebServer.enqueue(response);
@@ -118,6 +114,8 @@ public class SubscriptionsTest {
         final Subscription subscription2 = subscriptions.create(new Channel("NotificationChannel"));
 
         consumer.connect();
+        Thread.sleep(1000);
+        assertThat(consumer.getConnection().isOpen(), is(true));
 
         events.take(); // WebSocketListener#onMessage (subscribe)
         events.take(); // WebSocketListener#onMessage (subscribe)
@@ -140,9 +138,8 @@ public class SubscriptionsTest {
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
-            public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-                events.offer("onMessage:" + payload.readUtf8());
-                payload.close();
+            public void onMessage(WebSocket webSocket, String text) {
+                events.offer("onMessage:" + text);
             }
         });
         mockWebServer.enqueue(response);
@@ -330,27 +327,6 @@ public class SubscriptionsTest {
         assertThat(events.take(), anyOf(is("failed_1:" + e.getMessage()), is("failed_2:" + e.getMessage())));
     }
 
-    private static class DefaultWebSocketListener implements WebSocketListener {
-
-        @Override
-        public void onOpen(WebSocket webSocket, Response response) {
-        }
-
-        @Override
-        public void onFailure(IOException e, Response response) {
-        }
-
-        @Override
-        public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
-            payload.close();
-        }
-
-        @Override
-        public void onPong(Buffer payload) {
-        }
-
-        @Override
-        public void onClose(int code, String reason) {
-        }
+    private class DefaultWebSocketListener extends WebSocketListener {
     }
 }

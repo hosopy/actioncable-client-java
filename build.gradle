@@ -1,17 +1,28 @@
 group 'com.hosopy'
-version '0.1.2'
+version '0.2.0'
 
 apply plugin: 'java'
 
 repositories {
+    mavenCentral()
     jcenter()
+    google()
 }
 
 dependencies {
-    compile 'com.squareup.okhttp:okhttp-ws:2.5.0'
-    compile 'com.google.code.gson:gson:2.3.1'
 
-    testCompile 'junit:junit:4.11'
-    testCompile 'org.hamcrest:hamcrest-all:1.3'
-    testCompile 'com.squareup.okhttp:mockwebserver:2.5.0'
+    // take care when updating to okhttp 3.13.*
+    // From https://github.com/square/okhttp/blob/master/CHANGELOG.md#version-3130
+    // This release bumps our minimum requirements to Java 8+ or Android 5+.
+    // The OkHttp 3.12.x branch will be our long-term branch for Android 2.3+ (API level 9+) and
+    // Java 7+. These platforms lack support for TLS 1.2 and should not be used. But because
+    // upgrading is difficult we will backport critical fixes to the 3.12.x branch
+    // through December 31, 2020.
+    implementation 'com.squareup.okhttp3:okhttp:3.12.1'
+    implementation 'com.google.code.gson:gson:2.3.1'
+
+    testImplementation 'junit:junit:4.11'
+    testImplementation 'org.hamcrest:hamcrest-all:1.3'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:3.12.1'
+
 }

@@ -1,12 +1,5 @@
 package com.hosopy.actioncable;
 
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-import com.squareup.okhttp.ws.WebSocket;
-import com.squareup.okhttp.ws.WebSocketListener;
-import okio.Buffer;
-import okio.BufferedSource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -16,6 +9,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.SocketPolicy;
+import okio.ByteString;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -68,14 +70,12 @@ public class ConnectionTest {
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
             public void onOpen(WebSocket webSocket, Response response) {
-                try {
-                    webSocket.sendMessage(WebSocket.PayloadType.TEXT, new Buffer().writeUtf8("{}"));
-                } catch (IOException ignored) {
-                }
+                webSocket.send("{}");
             }
         });
         mockWebServer.enqueue(response);
         mockWebServer.start();
+        Thread.sleep(1000);
 
         final URI uri = mockWebServer.url("/").uri();
         final Connection connection = new Connection(uri, new Consumer.Options());
@@ -113,18 +113,19 @@ public class ConnectionTest {
             public void onOpen() {
                 events.offer("onOpen");
             }
-
             @Override
-            public void onClose() {
-                events.offer("onClose");
+            public void onClosed() {
+                super.onClosed();
+                events.offer("onClosed");
             }
         });
 
         connection.open();
         assertThat(events.take(), is("onOpen"));
+        assertThat(connection.isOpen(), is(true));
 
         connection.close();
-        assertThat(events.take(), is("onClose"));
+        assertThat(events.take(), is("onClosed"));
 
         mockWebServer.shutdown();
     }
@@ -136,10 +137,7 @@ public class ConnectionTest {
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
             public void onOpen(WebSocket webSocket, Response response) {
-                try {
-                    webSocket.close(1000, "Reason");
-                } catch (IOException ignored) {
-                }
+                webSocket.close(1000, "Reason");
             }
         });
         mockWebServer.enqueue(response);
@@ -152,13 +150,13 @@ public class ConnectionTest {
 
         connection.setListener(new DefaultConnectionListener() {
             @Override
-            public void onClose() {
-                events.offer("onClose");
+            public void onClosing() {
+                events.offer("onClosing");
             }
         });
         connection.open();
 
-        assertThat(events.take(), is("onClose"));
+        assertThat(events.take(), is("onClosing"));
 
         mockWebServer.shutdown();
     }
@@ -210,8 +208,8 @@ public class ConnectionTest {
             }
 
             @Override
-            public void onClose() {
-                events.offer("onClose");
+            public void onClosed() {
+                events.offer("onClosed");
             }
         });
 
@@ -225,7 +223,7 @@ public class ConnectionTest {
 
         connection.close();
 
-        assertThat(events.take(), is("onClose"));
+        assertThat(events.take(), is("onClosed"));
 
         assertThat(connection.isOpen(), is(false));
 
@@ -239,14 +237,13 @@ public class ConnectionTest {
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
             public void onOpen(WebSocket webSocket, Response response) {
-                try {
-                    webSocket.close(1000, "Reason");
-                } catch (IOException ignored) {
-                }
+                webSocket.close(1000, "Reason");
             }
         });
         mockWebServer.enqueue(response);
         mockWebServer.start();
+
+        Thread.sleep(1000);
 
         final URI uri = mockWebServer.url("/").uri();
         final Connection connection = new Connection(uri, new Consumer.Options());
@@ -260,22 +257,27 @@ public class ConnectionTest {
             }
 
             @Override
-            public void onClose() {
-                events.offer("onClose");
+            public void onClosed() {
+                events.offer("onClosed");
             }
         });
 
+        Thread.sleep(1000);
         assertThat(connection.isOpen(), is(false));
 
         connection.open();
 
+        Thread.sleep(1000);
         assertThat(events.take(), is("onOpen"));
 
+        // I'm not really sure why this connnection should still look opened, since it was closed by
+        // the server? Maybe Okhttp 3.5 already checks if the connection is still open and returns
+        // (rightfully) false?
         assertThat(connection.isOpen(), is(true));
 
         connection.close();
 
-        assertThat(events.take(), is("onClose"));
+        assertThat(events.take(), is("onClosed"));
 
         assertThat(connection.isOpen(), is(false));
 
@@ -321,6 +323,7 @@ public class ConnectionTest {
 
     private static class DefaultConnectionListener implements Connection.Listener {
 
+
         @Override
         public void onOpen() {
         }
@@ -334,30 +337,39 @@ public class ConnectionTest {
         }
 
         @Override
-        public void onClose() {
+        public void onClosing() {
+        }
+
+        @Override
+        public void onClosed() {
         }
     }
 
-    private static class DefaultWebSocketListener implements WebSocketListener {
+    private static class DefaultWebSocketListener extends WebSocketListener {
 
         @Override
         public void onOpen(WebSocket webSocket, Response response) {
         }
 
         @Override
-        public void onFailure(IOException e, Response response) {
+        public void onMessage(WebSocket webSocket, String text) {
         }
 
         @Override
-        public void onMessage(BufferedSource payload, WebSocket.PayloadType type) throws IOException {
+        public void onMessage(WebSocket webSocket, ByteString bytes) {
         }
 
         @Override
-        public void onPong(Buffer payload) {
+        public void onClosing(WebSocket webSocket, int code, String reason) {
+            webSocket.close(code, null);
         }
 
         @Override
-        public void onClose(int code, String reason) {
+        public void onClosed(WebSocket webSocket, int code, String reason) {
+        }
+
+        @Override
+        public void onFailure(WebSocket webSocket, Throwable t, Response response) {
         }
     }
 }
