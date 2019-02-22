@@ -105,7 +105,11 @@ public class Consumer {
         return connection.send(command.toJson());
     }
 
-    /*package*/ Connection getConnection() {
+    public Connection getConnection() {
         return connection;
+    }
+
+    public boolean isConnected() {
+        return this.connection != null && this.connection.isOpen();
     }
 }
