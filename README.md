@@ -67,6 +67,10 @@ subscription
 // 3. Establish connection
 consumer.connect();
 
+if(consumer.isConnected()) {
+    System.out.println("Consumer connected!");
+}
+
 // 4. Perform any action
 subscription.perform("away");
 
