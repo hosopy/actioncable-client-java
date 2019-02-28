@@ -1,5 +1,7 @@
 package com.hosopy.actioncable;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -10,13 +12,11 @@ import java.net.URISyntaxException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.SocketPolicy;
 import okio.ByteString;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -26,6 +26,18 @@ import static org.junit.Assert.assertThat;
 public class ConnectionTest {
 
     private static final int TIMEOUT = 10000;
+
+    MockWebServer mockWebServer;
+
+    @Before
+    public void setUp() {
+        mockWebServer = new MockWebServer();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mockWebServer.shutdown();
+    }
 
     @Test
     public void createUriAndOptions() throws URISyntaxException {
@@ -39,7 +51,6 @@ public class ConnectionTest {
 
     @Test(timeout = TIMEOUT)
     public void shouldFireOnOpenWhenConnected() throws InterruptedException, IOException {
-        final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener());
         mockWebServer.enqueue(response);
@@ -59,13 +70,10 @@ public class ConnectionTest {
         connection.open();
 
         assertThat(events.take(), is("onOpen"));
-
-        mockWebServer.shutdown();
     }
 
     @Test(timeout = TIMEOUT)
     public void shouldFireOnMessageWhenMessageReceived() throws InterruptedException, IOException {
-        final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
@@ -91,13 +99,10 @@ public class ConnectionTest {
         connection.open();
 
         assertThat(events.take(), is("onMessage:{}"));
-
-        mockWebServer.shutdown();
     }
 
     @Test(timeout = TIMEOUT)
     public void shouldFireOnCloseWhenDisconnectedByClient() throws InterruptedException, IOException {
-        final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener());
         mockWebServer.enqueue(response);
@@ -113,6 +118,7 @@ public class ConnectionTest {
             public void onOpen() {
                 events.offer("onOpen");
             }
+
             @Override
             public void onClosed() {
                 super.onClosed();
@@ -126,13 +132,10 @@ public class ConnectionTest {
 
         connection.close();
         assertThat(events.take(), is("onClosed"));
-
-        mockWebServer.shutdown();
     }
 
     @Test(timeout = TIMEOUT)
     public void shouldFireOnCloseWhenDisconnectedByServer() throws InterruptedException, IOException {
-        final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
@@ -157,13 +160,10 @@ public class ConnectionTest {
         connection.open();
 
         assertThat(events.take(), is("onClosing"));
-
-        mockWebServer.shutdown();
     }
 
     @Test(timeout = TIMEOUT)
     public void shouldFireOnFailureWhenInternalServerErrorReceived() throws InterruptedException, IOException {
-        final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
         response.setResponseCode(500);
         response.setStatus("HTTP/1.1 500 Internal Server Error");
@@ -184,13 +184,10 @@ public class ConnectionTest {
         connection.open();
 
         assertThat(events.take(), is("onFailed"));
-
-        mockWebServer.shutdown();
     }
 
     @Test(timeout = TIMEOUT)
     public void isOpenWhenOnOpenAndCloseByClient() throws InterruptedException, IOException {
-        final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener());
         mockWebServer.enqueue(response);
@@ -226,13 +223,10 @@ public class ConnectionTest {
         assertThat(events.take(), is("onClosed"));
 
         assertThat(connection.isOpen(), is(false));
-
-        mockWebServer.shutdown();
     }
 
     @Test(timeout = TIMEOUT)
     public void isOpenWhenOnOpenAndCloseByServer() throws InterruptedException, IOException {
-        final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
         response.withWebSocketUpgrade(new DefaultWebSocketListener() {
             @Override
@@ -280,13 +274,10 @@ public class ConnectionTest {
         assertThat(events.take(), is("onClosed"));
 
         assertThat(connection.isOpen(), is(false));
-
-        mockWebServer.shutdown();
     }
 
     @Test(timeout = TIMEOUT)
     public void isOpenWhenOnOpenAndFailure() throws InterruptedException, IOException {
-        final MockWebServer mockWebServer = new MockWebServer();
         final MockResponse response = new MockResponse();
         response.setResponseCode(500);
         response.setStatus("HTTP/1.1 500 Internal Server Error");
@@ -317,8 +308,6 @@ public class ConnectionTest {
         assertThat(events.take(), is("onFailed"));
 
         assertThat(connection.isOpen(), is(false));
-
-        mockWebServer.shutdown();
     }
 
     private static class DefaultConnectionListener implements Connection.Listener {
