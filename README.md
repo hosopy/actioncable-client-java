@@ -32,6 +32,14 @@ Please see [user guide](https://sites.google.com/site/gson/gson-user-guide) to k
 URI uri = new URI("ws://cable.example.com");
 Consumer consumer = ActionCable.createConsumer(uri);
 
+// or specify some options
+URI uri = new URI("ws://cable.example.com");
+Consumer.Options options = new Consumer.Options();
+options.reconnection = true;
+options.pingInterval = 30l;
+options.pingTimeUnit = TimeUnit.SECONDS;
+Consumer consumer = ActionCable.createConsumer(uri, options);
+
 // 2. Create subscription
 Channel appearanceChannel = new Channel("AppearanceChannel");
 Subscription subscription = consumer.getSubscriptions().create(appearanceChannel);
