@@ -6,7 +6,9 @@ import com.hosopy.util.QueryStringUtils;
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.URI;
+import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -87,6 +89,14 @@ public class Connection {
          * <p>To use your own OkHttpClient, set this option.</p>
          */
         public OkHttpClientFactory okHttpClientFactory;
+
+        /**
+         * The ping interval on how often a ping is sent over the websocket connection
+         * <p/>
+         * <p>To use your own ping interval, set this option.</p>
+         */
+        public Long pingInterval;
+        public TimeUnit pingTimeUnit;
 
         public interface OkHttpClientFactory {
             OkHttpClient createOkHttpClient();
@@ -196,6 +206,9 @@ public class Connection {
                 clientBuilder.cookieJar(options.cookieHandler);
             }
 
+            if (options.pingInterval != null && options.pingTimeUnit != null) {
+                clientBuilder.pingInterval(options.pingInterval, options.pingTimeUnit);
+            }
 
             client = clientBuilder.build();
         }
