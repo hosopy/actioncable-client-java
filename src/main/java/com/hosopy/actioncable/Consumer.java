@@ -101,6 +101,12 @@ public class Consumer {
         connectionMonitor.stop();
     }
 
+    public void unsubscribeAndDisconnect() {
+        subscriptions.removeAll();
+        connection.close();
+        connectionMonitor.stop();
+    }
+
     /*package*/ boolean send(Command command) {
         return connection.send(command.toJson());
     }

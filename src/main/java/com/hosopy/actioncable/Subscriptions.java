@@ -2,7 +2,7 @@ package com.hosopy.actioncable;
 
 import com.google.gson.JsonElement;
 
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -61,6 +61,15 @@ public class Subscriptions {
         forget(subscription);
         if (!contains(subscription)) {
             consumer.send(Command.unsubscribe(subscription.getIdentifier()));
+        }
+    }
+
+    /**
+     * Remove all subscriptions from collection.
+     */
+    public void removeAll() {
+        for (Subscription subscription : subscriptionProxies.keySet()) {
+            remove(subscription);
         }
     }
 
