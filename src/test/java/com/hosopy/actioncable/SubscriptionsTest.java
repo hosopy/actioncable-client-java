@@ -297,6 +297,50 @@ public class SubscriptionsTest {
         assertThat(events.take(), anyOf(is("disconnected_1"), is("disconnected_2")));
     }
 
+    @Test//(timeout = TIMEOUT)
+    public void notifyDisconnectedOnUnsubscribeAndDisconnect() throws IOException, InterruptedException, URISyntaxException {
+        final BlockingQueue<String> events = new LinkedBlockingQueue<String>();
+        final MockWebServer mockWebServer = new MockWebServer();
+        final MockResponse response = new MockResponse();
+        response.withWebSocketUpgrade(new DefaultWebSocketListener() {
+            @Override
+            public void onMessage(WebSocket webSocket, String text) {
+
+            }
+        });
+        mockWebServer.enqueue(response);
+
+        final Consumer consumer = new Consumer(mockWebServer.url("/").uri());
+
+        final Subscriptions subscriptions = consumer.getSubscriptions();
+
+        final Subscription subscription1 = subscriptions.create(new Channel("CommentsChannel"));
+        subscription1.onDisconnected(new Subscription.DisconnectedCallback() {
+            @Override
+            public void call() {
+                events.offer("disconnected_1");
+            }
+        });
+
+        final Subscription subscription2 = subscriptions.create(new Channel("NotificationChannel"));
+        subscription2.onDisconnected(new Subscription.DisconnectedCallback() {
+            @Override
+            public void call() {
+                events.offer("disconnected_2");
+            }
+        });
+        consumer.connect();
+        Thread.sleep(1000);
+        assertThat(consumer.getConnection().isOpen(), is(true));
+
+        consumer.unsubscribeAndDisconnect();
+
+
+        assertThat(events.take(), anyOf(is("disconnected_1"), is("disconnected_2")));
+        assertThat(events.take(), anyOf(is("disconnected_1"), is("disconnected_2")));
+        mockWebServer.shutdown();
+    }
+
     @Test(timeout = TIMEOUT)
     public void notifyFailed() throws IOException, InterruptedException, URISyntaxException {
         final BlockingQueue<String> events = new LinkedBlockingQueue<String>();
