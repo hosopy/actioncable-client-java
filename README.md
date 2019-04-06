@@ -86,6 +86,9 @@ subscription.perform("away");
 JsonObject params = new JsonObject();
 params.addProperty("foo", "bar");
 subscription.perform("appear", params);
+
+// 6. Unsubscribe & close connection
+consumer.unsubscribeAndDisconnect();
 ```
 
 ### Passing Parameters to Channel
