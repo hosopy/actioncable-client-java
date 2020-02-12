@@ -250,7 +250,7 @@ Consumer consumer = ActionCable.createConsumer(uri, options);
 ### Proguard Rules
 
 ```java
--keep class com.hosopy.actioncable.** { _; } 
+-keep class com.hosopy.actioncable.** { *; }
 -keep interface com.hosopy.actioncable._* { *; }
 ```
 
