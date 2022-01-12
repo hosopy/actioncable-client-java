@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.hosopy:actioncable-client-java:0.1.2'
+    implementation 'com.github.hosopy:actioncable-client-java:0.1.2'
 }
 ```
 
