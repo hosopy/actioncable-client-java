@@ -120,6 +120,6 @@ public class Consumer {
     }
 
     public boolean isConnected() {
-        return this.connection != null && this.connection.isOpen();
+        return this.connection != null && this.connection.isOpen() && !this.connectionMonitor.connectionIsStale();
     }
 }
