@@ -115,6 +115,10 @@ public class Consumer {
         return connection;
     }
 
+    public ConnectionMonitor getConnectionMonitor() {
+        return connectionMonitor;
+    }
+
     public boolean isConnected() {
         return this.connection != null && this.connection.isOpen();
     }
