@@ -91,7 +91,7 @@ public class ConnectionMonitor {
         }
     }
 
-    private boolean connectionIsStale() {
+    public boolean connectionIsStale() {
         return secondsSince(pingedAt > 0 ? pingedAt : startedAt) > STALE_THRESHOLD;
     }
 
